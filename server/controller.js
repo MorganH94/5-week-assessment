@@ -15,38 +15,68 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
 module.exports = {
 
     getCountries: (req, res) => {
-        sequelize.query(`SELECT * FROM cc_countries c
-        JOIN cc_countries u on c.countries_id = u.countries_id;`)
-            .then(dbRes => res.status(200).send(dbRes[0]))
-            .catch(err => console.log(err))
+        sequelize.query(`SELECT name, country_id FROM countries`)
+        
+        .then((dbRes) => {
+            console.log('getCountries works')
+            res.status(200).send(dbRes[0])
+        })
+        .catch((theseHands) => {
+            console.log('Error with getCountries')
+            console.log(theseHands)
+            res.status(500).send(theseHands)
+        })
     },
 
     createCity: (req, res) => {
-        const {name, rating} =req.body
+        const {name, rating, countryId} =req.body
         sequelize.query(`
-        INSERT INTO cc_countries (name, rating, countryId)
-        VALUES ('${name}', '${rating}', ${countryId})
-        RETURNING *;
-        `).then(dbRes => res.status(200).send(dbRes[0]))
-        .catch(theseHands => console.log(theseHands))
+        INSERT INTO countries (name, rating, countryId)
+        VALUES ('${name}', '${rating}', ${countryId});
+        `)
+        
+        .then((dbRes) => {
+            console.log('createCity works')
+            res.status(200).send(dbRes[0])
+        })
+        .catch((theseHands) => {
+            console.log('Error with createCity')
+            console.log(theseHands)
+            res.status(500).send(theseHands)
+        })
     },
 
     getCities: (req, res) => {
         sequelize.query(`
-        SELECT * FROM cc_cities AS c
-        JOIN cc_countries AS u
-        ON c.country_id = u.country_id
-        WHERE u.country_id = ${countryId}
-        `).then(dbRes => res.status(200).send(dbRes[0]))
-        .catch(theseHands => console.log(theseHands))
+        SELECT name, city_id FROM cities`)
+        
+        .then((dbRes) => {
+            console.log('getCities works')
+            res.status(200).send(dbRes[0])
+        })
+        .catch((theseHands) => {
+            console.log('Error with getCities')
+            console.log(theseHands)
+            res.status(500).send(theseHands)
+        })
     },
 
     deleteCity: (req, res) => {
+        const {id} = req.params
         sequelize.query(`
-        DELETE FROM cc_cities
-        WHERE city_name = 'Paris'
-        `).then(dbRes => res.status(200).send(dbRes[0]))
-        .catch(theseHands => console.log(theseHands))
+        DELETE FROM cities
+        WHERE id = ${id}
+        `)
+
+        .then((dbRes) => {
+            console.log('deleteCity works')
+            res.status(200).send(dbRes[0])
+        })
+        .catch((theseHands) => {
+            console.log('Error with deleteCity')
+            console.log(theseHands)
+            res.status(500).send(theseHands)
+        })
     },
 
 
@@ -56,17 +86,17 @@ module.exports = {
             drop table if exists cities;
             drop table if exists countries;
 
-            create table cc_countries (
+            create table countries (
                 country_id serial primary key, 
                 name varchar(100)
             );
 
-            create table cc_cities (
+            create table cities (
                 city_id serial primary key,
                 name varchar(100),
                 rating integer,
                 country_id integer
-            )
+            );
 
             insert into countries (name)
             values ('Afghanistan'),
